@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { CalendarDays, Check, Clock3, FileText, Pause, Play, RotateCcw, ScanText, Sunrise } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/brand";
@@ -28,16 +28,18 @@ const examples = [
   },
 ];
 
-export function RoutinePreview() {
+export function RoutinePreview({ enhancedMotion = false }: { enhancedMotion?: boolean } = {}) {
   const [selected, setSelected] = useState(0);
   const container = useRef<HTMLElement | null>(null);
   const card = useRef<HTMLDivElement | null>(null);
+  const paper = useRef<HTMLDivElement | null>(null);
   const pointerRect = useRef<DOMRect | null>(null);
   const pointerFrame = useRef<number | null>(null);
   const pointerPosition = useRef({ x: 0, y: 0 });
-  const playback = useRoutinePlayback(container, selected);
+  const playback = useRoutinePlayback(container, selected, enhancedMotion);
   const example = examples[selected];
   const Icon = example.icon;
+  const canTilt = !playback.reducedMotion && (!enhancedMotion || playback.motionState === "playing");
 
   const resetTilt = useCallback(() => {
     if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
@@ -45,21 +47,23 @@ export function RoutinePreview() {
     pointerRect.current = null;
     card.current?.style.removeProperty("--tilt-x");
     card.current?.style.removeProperty("--tilt-y");
+    paper.current?.style.removeProperty("--paper-x");
+    paper.current?.style.removeProperty("--paper-y");
   }, []);
 
   useEffect(() => {
-    if (playback.reducedMotion) resetTilt();
+    if (!canTilt) resetTilt();
     return resetTilt;
-  }, [playback.reducedMotion, resetTilt]);
+  }, [canTilt, resetTilt]);
 
   const enterCard = (event: PointerEvent<HTMLDivElement>) => {
-    if (!playback.reducedMotion && event.pointerType === "mouse") {
+    if (canTilt && event.pointerType === "mouse") {
       pointerRect.current = event.currentTarget.getBoundingClientRect();
     }
   };
   const moveCard = (event: PointerEvent<HTMLDivElement>) => {
     const rect = pointerRect.current;
-    if (playback.reducedMotion || event.pointerType !== "mouse" || !rect) return;
+    if (!canTilt || event.pointerType !== "mouse" || !rect) return;
     pointerPosition.current = {
       x: Math.max(-0.5, Math.min(0.5, (event.clientX - rect.left) / rect.width - 0.5)),
       y: Math.max(-0.5, Math.min(0.5, (event.clientY - rect.top) / rect.height - 0.5)),
@@ -69,6 +73,10 @@ export function RoutinePreview() {
       const point = pointerPosition.current;
       card.current?.style.setProperty("--tilt-x", `${(-point.y * 3).toFixed(2)}deg`);
       card.current?.style.setProperty("--tilt-y", `${(point.x * 4).toFixed(2)}deg`);
+      if (enhancedMotion) {
+        paper.current?.style.setProperty("--paper-x", `${(-point.x * 6).toFixed(2)}px`);
+        paper.current?.style.setProperty("--paper-y", `${(-point.y * 4).toFixed(2)}px`);
+      }
       pointerFrame.current = null;
     });
   };
@@ -77,7 +85,7 @@ export function RoutinePreview() {
     <figure ref={container} className={styles.preview} data-example-routine="true" data-motion={playback.motionState} data-phase={playback.phase}>
       <figcaption className={styles.previewCaption}>
         <span>Example routine</span>
-        <div className={styles.previewControls} role="group" aria-label="Example animation controls">
+        {!enhancedMotion && <div className={styles.previewControls} role="group" aria-label="Example animation controls">
           <Button type="button" variant="ghost" size="icon" className={styles.previewControl}
             aria-label={playback.paused ? "Play example animation" : "Pause example animation"}
             aria-pressed={playback.paused} disabled={playback.reducedMotion}
@@ -89,21 +97,21 @@ export function RoutinePreview() {
             aria-label="Replay example animation" title="Replay animation" onClick={playback.replay}>
             <RotateCcw size={13} aria-hidden="true" />
           </Button>
-        </div>
+        </div>}
       </figcaption>
       <div className={styles.routineChoices} role="group" aria-label="Choose an example routine">
         {examples.map((item, index) => (
           <Button type="button" variant="ghost" key={item.name} aria-pressed={selected === index}
-            className={`${styles.routineChoice} ${selected === index ? styles.routineChoiceActive : ""}`}
+            className={cn(styles.routineChoice, selected === index && styles.routineChoiceActive, enhancedMotion && styles.authChoice)}
             onClick={() => { if (selected !== index) { playback.restart(); resetTilt(); setSelected(index); } }}>
-            {item.name}
+            <span className={enhancedMotion ? styles.authChoiceLabel : undefined}>{item.name}</span>
           </Button>
         ))}
       </div>
       <span className="sr-only" role="status">{example.name} selected.{playback.paused ? " Animation paused." : ""}</span>
       <div className={styles.previewScene} onPointerEnter={enterCard} onPointerMove={moveCard} onPointerLeave={resetTilt}>
-        <div className={styles.previewPaper} aria-hidden="true" />
-        <div key={selected} className={styles.cardMotion}>
+        <div key={enhancedMotion ? `paper-${selected}` : "paper"} ref={paper} className={cn(styles.previewPaper, enhancedMotion && styles.authPaperMotion)} aria-hidden="true" />
+        <div key={selected} className={enhancedMotion ? styles.authCardMotion : styles.cardMotion}>
           <div ref={card} className={styles.routineCard}>
             <header className={styles.routineHeader}>
               <span className={styles.routineIcon}><Icon size={23} strokeWidth={1.5} aria-hidden="true" /></span>
@@ -118,20 +126,31 @@ export function RoutinePreview() {
                 const state = getRoutineStepState(index, playback.phase);
                 const StepIcon = state === "complete" ? Check : step.icon;
                 return (
-                  <li key={`${example.name}-${step.time}`} className={styles.routineStep} data-state={state}>
+                  <li key={`${example.name}-${step.time}`} className={styles.routineStep} data-state={state}
+                    style={enhancedMotion ? { "--step-order": index } as CSSProperties : undefined}>
                     <time className={styles.stepTime} dateTime={step.time}>{step.time}</time>
-                    <span className={cn(styles.stepIcon, state === "complete" && styles.stepComplete)}>
-                      {state === "active" && <span className={styles.nodeHalo} aria-hidden="true" />}
-                      <StepIcon className={state === "complete" ? styles.stepCheck : ""} size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span className={cn(styles.stepIcon, state === "complete" && styles.stepComplete, enhancedMotion && styles.authStepIcon)}>
+                      {state === "active" && <>
+                        {enhancedMotion && <span className={styles.authNodeEcho} aria-hidden="true" />}
+                        <span className={enhancedMotion ? styles.authNodeHalo : styles.nodeHalo} aria-hidden="true" />
+                      </>}
+                      <StepIcon className={state === "complete" ? enhancedMotion ? styles.authStepCheck : styles.stepCheck : ""} size={14} strokeWidth={1.8} aria-hidden="true" />
                     </span>
-                    <div className={styles.stepCopy}><p>{step.title}</p><span>{step.detail}</span></div>
-                    {index < 2 && <><span className={styles.flowBeam} aria-hidden="true" /><span className={styles.flowToken} aria-hidden="true" /></>}
+                    <div className={cn(styles.stepCopy, enhancedMotion && styles.authStepCopy)}><p>{step.title}</p><span>{step.detail}</span></div>
+                    {index < 2 && <>
+                      <span className={enhancedMotion ? styles.authFlowBeam : styles.flowBeam} aria-hidden="true" />
+                      {enhancedMotion ? (
+                        <span className={styles.authFlowCarrier} aria-hidden="true">
+                          <span className={styles.authFlowTrack}><span className={styles.authFlowTrail} /><span className={styles.authFlowSpark} /></span>
+                        </span>
+                      ) : <span className={styles.flowToken} aria-hidden="true" />}
+                    </>}
                   </li>
                 );
               })}
             </ol>
             <div className={styles.routineFootnote}>
-              <span className={styles.statusDot} aria-hidden="true" />
+              <span className={cn(styles.statusDot, enhancedMotion && playback.phase === 4 && styles.authStepCheck)} aria-hidden="true" />
               You set the direction. Your agent follows through.
             </div>
           </div>

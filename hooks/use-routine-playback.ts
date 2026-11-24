@@ -13,7 +13,7 @@ const getReducedMotion = () => window.matchMedia(motionQuery).matches;
 const getServerReducedMotion = () => true;
 
 /** Small demo clock: one timer per beat, never a per-frame React render. */
-export function useRoutinePlayback(container: RefObject<HTMLElement | null>, selection: number) {
+export function useRoutinePlayback(container: RefObject<HTMLElement | null>, selection: number, singlePass = false) {
   const reducedMotion = useSyncExternalStore(subscribeMotionPreference, getReducedMotion, getServerReducedMotion);
   const [phase, setPhase] = useState<RoutinePhase>(4);
   const [paused, setPaused] = useState(false);
@@ -54,9 +54,11 @@ export function useRoutinePlayback(container: RefObject<HTMLElement | null>, sel
 
     const tick = () => {
       if (clock.current.epoch !== epoch || document.visibilityState !== "visible") return;
-      const elapsed = (savedElapsed + performance.now() - startedAt) % ROUTINE_CYCLE_MS;
-      setPhase(getRoutinePhase(elapsed));
-      timer = setTimeout(tick, getNextRoutineDelay(elapsed) + 4);
+      const totalElapsed = savedElapsed + performance.now() - startedAt;
+      const elapsed = singlePass ? totalElapsed : totalElapsed % ROUTINE_CYCLE_MS;
+      setPhase(getRoutinePhase(elapsed, singlePass));
+      const delay = getNextRoutineDelay(elapsed, singlePass);
+      if (delay !== null) timer = setTimeout(tick, delay + 4);
     };
     timer = setTimeout(tick, 0);
     return () => {
@@ -64,10 +66,11 @@ export function useRoutinePlayback(container: RefObject<HTMLElement | null>, sel
       // A replay invalidates the old effect; its cleanup cannot undo the reset.
       if (clock.current.epoch === epoch) {
         const stoppedAt = frozenAt.current ?? performance.now();
-        clock.current.elapsed = (savedElapsed + Math.max(0, stoppedAt - startedAt)) % ROUTINE_CYCLE_MS;
+        const elapsed = savedElapsed + Math.max(0, stoppedAt - startedAt);
+        clock.current.elapsed = singlePass ? elapsed : elapsed % ROUTINE_CYCLE_MS;
       }
     };
-  }, [motionState, selection, revision]);
+  }, [motionState, selection, revision, singlePass]);
 
   const togglePause = () => {
     if (!paused) frozenAt.current = performance.now();

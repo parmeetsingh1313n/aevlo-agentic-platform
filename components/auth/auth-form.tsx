@@ -18,7 +18,7 @@ export function AuthForm({ mode, availability }: { mode: AuthMode; availability:
     if (pending.current) return;
     setLocalError(null);
     if (!availability[provider]) {
-      setLocalError(`${providerNames[provider]} sign-in isn’t connected in this preview. Open Setup details below to connect it.`);
+      setLocalError(`${providerNames[provider]} sign-in is currently unavailable. Please try again later.`);
       return;
     }
 
@@ -35,5 +35,5 @@ export function AuthForm({ mode, availability }: { mode: AuthMode; availability:
     }
   }
 
-  return <AuthFormView mode={mode} availability={availability} loadingProvider={loadingProvider} error={error} switchHref={getAuthSwitchHref(mode, callbackUrl)} onContinue={onContinue} />;
+  return <AuthFormView mode={mode} loadingProvider={loadingProvider} error={error} switchHref={getAuthSwitchHref(mode, callbackUrl)} onContinue={onContinue} />;
 }

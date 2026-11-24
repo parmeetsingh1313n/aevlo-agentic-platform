@@ -9,9 +9,9 @@ Aevlo is an early-stage workspace foundation for AI agents, connected tools, and
 - Branded home, sign-in, and sign-up pages.
 - Google and GitHub OAuth wiring with safe callback handling and configuration guidance.
 - Light/dark themes, local typography, and responsive layouts.
-- Interactive example routines with playback controls and reduced-motion support.
+- Interactive example routines with one-shot auth previews, homepage playback controls, and reduced-motion support.
 - PostgreSQL/Drizzle schema and example Inngest background jobs.
-- Automated tests for authentication UI, callback handling, themes, routine playback, and local setup.
+- Automated checks for theme contrast, homepage entry points, schema shape, font integrity, and local setup.
 
 ## Project status
 

@@ -21,7 +21,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode | "home"; childre
               <h2 className={styles.storyHeading}>A little less busy.<br />A lot more done.</h2>
               <p className={styles.storyDescription}>Give your recurring work a routine.<br /> Keep your attention for everything else.</p>
             </div>
-            <RoutinePreview />
+            <RoutinePreview enhancedMotion={mode !== "home"} />
           </div>
           <p className={styles.storyFooter}>
             <CircleCheck size={17} strokeWidth={1.5} aria-hidden="true" />
