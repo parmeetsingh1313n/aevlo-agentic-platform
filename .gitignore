@@ -1,0 +1,56 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local environment files and credentials
+.env*
+!.env.example
+*.pem
+*.key
+credentials*.json
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local notes, editor settings, and assistant tooling
+/docs/
+/.claude/
+/.firecrawl/
+/.impeccable/
+/.reference/
+/.superpowers/
+/.playwright-mcp/
+/.vscode/
+
+# one-time scaffolding utilities
+/scripts/scaffold.mjs
+/tests/scaffold.test.mjs
+
+# local browser probe and test output
+/tests/browser-check.js
+/playwright-report/
+/test-results/
+
+# supplied HTML webpage, not a usable font
+/fonts/BricolageGrotesque-Italic.ttf
