@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, ChevronDown, KeyRound, Loader2 } from "lucide-react";
+import { AlertCircle, KeyRound, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { providerNames, type AuthMode, type OAuthAvailability, type OAuthProviderId } from "@/lib/auth-ui";
+import { providerNames, type AuthMode, type OAuthProviderId } from "@/lib/auth-ui";
 import { authStyles as styles } from "./auth-styles";
 
 export interface AuthFormViewProps {
   mode: AuthMode;
-  availability: OAuthAvailability;
   loadingProvider: OAuthProviderId | null;
   error: string | null;
   switchHref: string;
@@ -30,9 +29,8 @@ function ProviderIcon({ provider }: { provider: OAuthProviderId }) {
   );
 }
 
-export function AuthFormView({ mode, availability, loadingProvider, error, switchHref, onContinue }: AuthFormViewProps) {
+export function AuthFormView({ mode, loadingProvider, error, switchHref, onContinue }: AuthFormViewProps) {
   const isSignUp = mode === "sign-up";
-  const unavailable = (["google", "github"] as const).filter((provider) => !availability[provider]);
 
   return (
     <div className={styles.formBody}>
@@ -49,7 +47,6 @@ export function AuthFormView({ mode, availability, loadingProvider, error, switc
             key={provider} type="button" variant="outline" size="lg"
             className={`${styles.providerButton} ${provider === "github" ? styles.githubButton : ""}`}
             onClick={() => onContinue(provider)} disabled={Boolean(loadingProvider)}
-            aria-describedby={!availability[provider] ? "oauth-setup-note" : undefined}
           >
             {loadingProvider === provider ? <Loader2 aria-hidden="true" className={`${styles.providerIcon} animate-spin motion-reduce:animate-none`} /> : <ProviderIcon provider={provider} />}
             {loadingProvider === provider ? `Connecting to ${providerNames[provider]}…` : `Continue with ${providerNames[provider]}`}
@@ -64,25 +61,6 @@ export function AuthFormView({ mode, availability, loadingProvider, error, switc
         <Link href={switchHref}>{isSignUp ? "Sign in" : "Create an account"}</Link>
       </p>
 
-      {unavailable.length > 0 && (
-        <aside className={styles.setupNotice} aria-label="Sign-in configuration">
-          <p id="oauth-setup-note"><span className={styles.previewBadge}>Local preview</span> {unavailable.map((provider) => providerNames[provider]).join(" and ")} sign-in {unavailable.length === 1 ? "isn’t" : "aren’t"} connected yet.</p>
-          <details className="group/details">
-            <summary className={styles.setupSummary}>Setup details <ChevronDown size={13} className="group-open/details:rotate-180" aria-hidden="true" /></summary>
-            <div className={styles.setupDetails}>
-              <p>Add your OAuth credentials to <code>.env.local</code> and restart the app.</p>
-              {unavailable.map((provider) => (
-                <div key={provider}>
-                  <strong>{providerNames[provider]}</strong>
-                  <code>{provider.toUpperCase()}_CLIENT_ID</code>
-                  <code>{provider.toUpperCase()}_CLIENT_SECRET</code>
-                  <span>Callback path: <code>/api/auth/callback/{provider}</code></span>
-                </div>
-              ))}
-            </div>
-          </details>
-        </aside>
-      )}
       <p className={styles.privacyNote}>Your provider handles sign-in. Aevlo never sees your Google or GitHub password.</p>
     </div>
   );
