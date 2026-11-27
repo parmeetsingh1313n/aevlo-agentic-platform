@@ -10,6 +10,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadModule } from "./helpers/load-ts-module.mjs";
 import { getTableColumns, getTableName } from "drizzle-orm";
+import { getTableConfig } from "drizzle-orm/pg-core";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -22,15 +23,38 @@ test("the public homepage gives visitors a branded entry with working auth desti
   assert.equal((html.match(/<h1(?:\s|>)/g) ?? []).length, 1, "The entry page needs one primary heading.");
 });
 
-test("the setup schema contains the users table without the unused demo posts table", async () => {
+test("the workspace schema preserves profiles and relates saved agents to their owners", async () => {
   const schema = await loadModule("db/schema.ts");
-  assert.deepEqual(Object.keys(schema), ["users"]);
+  assert.deepEqual(Object.keys(schema).sort(), ["agentConfig", "users"]);
   assert.equal(getTableName(schema.users), "users");
   const columns = getTableColumns(schema.users);
-  assert.deepEqual(Object.keys(columns), ["id", "name", "email", "createdAt"]);
+  assert.deepEqual(Object.keys(columns), ["id", "name", "email", "createdAt", "credits"]);
   assert.equal(columns.email.notNull, true);
   assert.equal(columns.email.isUnique, true);
   assert.equal(columns.createdAt.name, "created_at");
+  assert.equal(columns.createdAt.notNull, true);
+  assert.equal(columns.credits.notNull, true);
+  assert.equal(columns.credits.default, 5);
+
+  assert.equal(getTableName(schema.agentConfig), "agentConfig");
+  const agentColumns = getTableColumns(schema.agentConfig);
+  assert.deepEqual(Object.keys(agentColumns), ["id", "agentId", "name", "description", "agentImage", "createdAt", "userEmail"]);
+  assert.equal(agentColumns.id.primary, true);
+  assert.equal(agentColumns.agentId.notNull, true);
+  assert.equal(agentColumns.agentId.isUnique, true, "Creation requests must be unique even when writes overlap.");
+  assert.equal(agentColumns.agentId.length, 36);
+  assert.equal(agentColumns.name.notNull, true);
+  assert.equal(agentColumns.name.length, 80);
+  assert.equal(agentColumns.createdAt.notNull, true);
+  assert.equal(agentColumns.createdAt.hasDefault, true);
+  assert.equal(agentColumns.userEmail.notNull, true);
+
+  const foreignKeys = getTableConfig(schema.agentConfig).foreignKeys;
+  assert.equal(foreignKeys.length, 1);
+  const reference = foreignKeys[0].reference();
+  assert.equal(reference.columns[0], agentColumns.userEmail);
+  assert.equal(reference.foreignTable, schema.users);
+  assert.equal(reference.foreignColumns[0], columns.email);
 });
 
 const auditedFonts = [

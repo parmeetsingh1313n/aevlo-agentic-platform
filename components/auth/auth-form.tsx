@@ -8,7 +8,7 @@ import { AuthFormView } from "./auth-form-view";
 
 export function AuthForm({ mode, availability }: { mode: AuthMode; availability: OAuthAvailability }) {
   const searchParams = useSearchParams();
-  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl") || "/workspace");
   const [loadingProvider, setLoadingProvider] = useState<OAuthProviderId | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
   const pending = useRef(false);

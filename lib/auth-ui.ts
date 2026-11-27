@@ -38,6 +38,8 @@ export function getAuthSwitchHref(mode: AuthMode, callbackUrl: string): string {
 }
 
 const errorMessages: Record<string, string> = {
+  AccountPersistence: "We couldn’t save your account. Please try again in a moment.",
+  OAuthEmailMissing: "Your provider didn’t share an email address. Use an account with an email address or try another provider.",
   Configuration: "Sign-in isn’t configured for this workspace yet. Connect an OAuth provider to continue.",
   AccessDenied: "That account wasn’t granted access. Try again with an account that can access this workspace.",
   OAuthAccountNotLinked: "This email is linked to another sign-in method. Continue with the provider you used before.",
