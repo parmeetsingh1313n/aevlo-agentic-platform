@@ -7,15 +7,20 @@ Aevlo is an early-stage workspace foundation for AI agents, connected tools, and
 ## What's included
 
 - Branded home, sign-in, and sign-up pages.
-- Google and GitHub OAuth wiring with safe callback handling and configuration guidance.
+- Google and GitHub OAuth sign-in with database-backed user profiles and safe callback handling.
 - Light/dark themes, local typography, and responsive layouts.
+- A protected workspace, shared sidebar, signed-in account menu, and agent form preview with DiceBear avatar shuffling.
 - Interactive example routines with one-shot auth previews, homepage playback controls, and reduced-motion support.
 - PostgreSQL/Drizzle schema and example Inngest background jobs.
 - Automated checks for theme contrast, homepage entry points, schema shape, font integrity, and local setup.
 
 ## Project status
 
-This first version focuses on the application shell and platform foundations. Routine previews are demonstrations, not live automation. Agent execution, connected tools, database-backed accounts, and persisted routine management are not implemented yet.
+This first version focuses on the application shell and platform foundations. Routine previews are demonstrations, not live automation. Agent execution, connected tools, and persisted routine management are not implemented yet.
+
+Successful Google or GitHub sign-in saves a profile in PostgreSQL's `users` table. Repeat sign-ins update the same email's profile without creating duplicate rows. Sessions use JWTs; OAuth tokens are not stored in this table.
+
+Sign-in opens `/workspace` by default. The `/workspace/create-agent` form follows the tutorial's Workspace Layout chapter: avatar shuffling, editable name/description, and cancellation work. Saving agents belongs to the following Create Agent chapter and is unavailable in this preview. Sidebar agent examples are illustrative, not saved records.
 
 The example event-trigger endpoint is for development; add authorization and rate limiting before exposing it publicly. Production use also requires real service configuration and a securely generated authentication secret.
 
@@ -54,7 +59,7 @@ Add OAuth credentials to `.env.local`, restart the development server, and regis
 - `http://localhost:3000/api/auth/callback/google`
 - `http://localhost:3000/api/auth/callback/github`
 
-For database tooling, put `DATABASE_URL` in an ignored `.env` file or export it in your shell. The Drizzle CLI does not automatically read `.env.local`.
+Set `DATABASE_URL` in an ignored `.env.local` or `.env` file, or export it in your shell. The Drizzle configuration loads the same development environment as the app. Apply the schema with `npm run db:push` before testing OAuth sign-in.
 
 ```sh
 npm run db:generate

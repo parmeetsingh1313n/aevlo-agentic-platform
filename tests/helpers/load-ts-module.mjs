@@ -17,6 +17,8 @@ export function loadModule(relativePath) {
 }
 
 function load(filename) {
+  // Aliases and direct paths must share one module instance on Windows.
+  filename = resolve(filename);
   if (cache.has(filename)) return cache.get(filename).exports;
   assert.ok(existsSync(filename), `Not implemented yet: ${filename}`);
   const compiled = ts.transpileModule(readFileSync(filename, "utf8"), {
@@ -50,7 +52,7 @@ function load(filename) {
   };
   runInNewContext(compiled.outputText, {
     module: targetModule, exports: targetModule.exports, require: projectRequire,
-    process, console, URL, URLSearchParams, Buffer, setTimeout, clearTimeout,
+    process, console, URL, URLSearchParams, Request, Response, Headers, Buffer, setTimeout, clearTimeout,
   }, { filename });
   return targetModule.exports;
 }
