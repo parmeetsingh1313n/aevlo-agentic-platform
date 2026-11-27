@@ -2,10 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 import { loadModule } from "./helpers/load-ts-module.mjs";
 
 const { loadAgentSpace } = loadModule("lib/agent-space.ts");
 const { toAgentListEntries } = loadModule("lib/workspace-ui.ts");
+
+function renderAgentView(View, props) {
+  const router = { back() {}, forward() {}, refresh() {}, push() {}, replace() {}, prefetch: async () => {} };
+  return renderToStaticMarkup(React.createElement(AppRouterContext.Provider, { value: router }, React.createElement(View, props)));
+}
 
 const agent = {
   id: 7,
@@ -68,9 +74,9 @@ test("the sidebar entries are serializable, ordered, and owned", () => {
 
 test("the agent space view shows the saved name, avatar, and instructions", async () => {
   const { AgentSpaceView } = loadModule("components/custom/workspace/agent-space-view.tsx");
-  const html = renderToStaticMarkup(React.createElement(AgentSpaceView, {
+  const html = renderAgentView(AgentSpaceView, {
     agent: { ...agent, createdAt: agent.createdAt.toISOString() },
-  }));
+  });
 
   assert.match(html, /Daily Briefer/);
   assert.match(html, /Summarize my inbox every morning\./);
@@ -80,9 +86,9 @@ test("the agent space view shows the saved name, avatar, and instructions", asyn
 
 test("the agent space view states plainly that chat is not available yet", async () => {
   const { AgentSpaceView } = loadModule("components/custom/workspace/agent-space-view.tsx");
-  const html = renderToStaticMarkup(React.createElement(AgentSpaceView, {
+  const html = renderAgentView(AgentSpaceView, {
     agent: { ...agent, description: null, createdAt: agent.createdAt.toISOString() },
-  }));
+  });
 
   assert.match(html, /not available yet/i);
   assert.ok(!/undefined/.test(html), "A missing instruction must not render as 'undefined'.");
