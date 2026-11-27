@@ -16,6 +16,7 @@ export type AgentSpaceAgent = {
   agentImage: string;
   createdAt: Date;
   userEmail: string;
+  version?: string;
 };
 
 export type AgentSpaceState =

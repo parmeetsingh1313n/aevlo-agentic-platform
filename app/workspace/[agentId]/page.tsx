@@ -28,6 +28,7 @@ export default async function AgentSpacePage({
         description: state.agent.description,
         agentImage: state.agent.agentImage,
         createdAt: state.agent.createdAt.toISOString(),
+        version: state.agent.version,
       }}
     />
   );

@@ -1,4 +1,4 @@
-/** The tutorial's DiceBear 10.x Gaze avatar, with an opaque non-personal seed. */
+/** DiceBear 10.x Gaze avatar with an opaque, non-personal seed. */
 export function getAgentAvatarUrl(seed: string, animated = true): string {
   const parameters = new URLSearchParams();
   if (animated) parameters.set("tags", "animation");

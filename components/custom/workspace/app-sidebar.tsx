@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { getProfileInitials } from "@/lib/workspace-ui";
 import type { AgentListEntry } from "@/lib/workspace-ui";
 
-export function AppSidebar({ agents = [] }: { agents?: AgentListEntry[] }) {
+export function AppSidebar({ agents = [], activeAgentId }: { agents?: AgentListEntry[]; activeAgentId?: string }) {
   const { data, status } = useSession();
   const { setOpenMobile } = useSidebar();
   const user = data?.user;
@@ -43,7 +43,7 @@ export function AppSidebar({ agents = [] }: { agents?: AgentListEntry[] }) {
       <SidebarContent>
         <SidebarGroup className="px-4 pt-3">
           <SidebarGroupLabel className="px-0 text-xs">Your agents</SidebarGroupLabel>
-          <AgentList agents={agents} />
+          <AgentList agents={agents} activeAgentId={activeAgentId} onNavigate={() => setOpenMobile(false)} />
         </SidebarGroup>
       </SidebarContent>
 
