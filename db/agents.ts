@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db, agentConfig, users } from "@/db";
 import { AgentConflictError, AgentNotFoundError, AgentUpdateConflictError, isAgentId, type CreateAgentInput, type UpdateAgentInput } from "@/lib/agent-validation";
 
@@ -10,7 +10,9 @@ export type AgentOwner = { email: string; name?: string | null };
 // revision number, and multiple writes in one transaction can share it.
 const agentVersion = sql<string>`${agentConfig}.${sql.identifier("xmin")}::text`;
 const agentSelection = {
-  ...getTableColumns(agentConfig),
+  id: agentConfig.id, agentId: agentConfig.agentId, name: agentConfig.name,
+  description: agentConfig.description, agentImage: agentConfig.agentImage,
+  createdAt: agentConfig.createdAt, userEmail: agentConfig.userEmail, tools: agentConfig.tools,
   version: agentVersion.as("version"),
 };
 

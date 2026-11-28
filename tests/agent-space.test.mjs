@@ -84,13 +84,16 @@ test("the agent space view shows the saved name, avatar, and instructions", asyn
   assert.equal((html.match(/<h1(?:\s|>)/g) ?? []).length, 1);
 });
 
-test("the agent space view states plainly that chat is not available yet", async () => {
+test("the agent space view distinguishes examples and explains saved instructions and temporary history", async () => {
   const { AgentSpaceView } = loadModule("components/custom/workspace/agent-space-view.tsx");
   const html = renderAgentView(AgentSpaceView, {
     agent: { ...agent, description: null, createdAt: agent.createdAt.toISOString() },
   });
 
-  assert.match(html, /not available yet/i);
+  assert.match(html, /Example conversation/i);
+  assert.match(html, /Replies use your saved instructions/i);
+  assert.match(html, /Messages are not saved/i);
+  assert.doesNotMatch(html, /Live AI replies are not available yet/i);
   assert.ok(!/undefined/.test(html), "A missing instruction must not render as 'undefined'.");
 });
 

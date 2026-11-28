@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -10,12 +10,8 @@ import {
   AgentConfigProvider,
   useAgentConfig,
 } from "@/context/agent-config-context";
-import {
-  agentPreviewReducer,
-  createAgentPreview,
-  MAX_PREVIEW_MESSAGES,
-  type PreviewAgent,
-} from "@/lib/agent-preview";
+import type { PreviewAgent } from "@/lib/agent-preview";
+import { useAgentChat } from "@/hooks/use-agent-chat";
 import { AgentConfiguration } from "./agent-configuration";
 import { ChatHeader } from "./chat-header";
 import { ChatPanel } from "./chat-panel";
@@ -23,11 +19,8 @@ import styles from "./agent-space.module.css";
 
 function AgentSpaceContent() {
   const config = useAgentConfig();
-  const [conversation, dispatch] = useReducer(
-    agentPreviewReducer,
-    undefined,
-    createAgentPreview,
-  );
+  const chat = useAgentChat(config.agentId);
+  const { conversation } = chat;
   const [configOpen, setConfigOpen] = useState(false);
   const [messageDraft, setMessageDraft] = useState("");
   const displayedAgent = { ...config.draft, name: config.draft.name.trim() || config.state.saved.name };
@@ -46,9 +39,9 @@ function AgentSpaceContent() {
           agent={displayedAgent}
           dirty={config.dirty}
           active={conversation.active}
-          onToggle={() => dispatch({ type: "toggle" })}
+          onToggle={chat.toggle}
           onClear={() => {
-            dispatch({ type: "clear" });
+            chat.clear();
             setMessageDraft("");
           }}
           onConfigure={() => setConfigOpen(true)}
@@ -58,17 +51,20 @@ function AgentSpaceContent() {
           active={conversation.active}
           messages={conversation.messages}
           example={conversation.example}
+          pending={conversation.pending}
+          error={conversation.error}
+          retryable={conversation.retryable}
+          dirty={config.dirty}
+          capacityReached={conversation.capacityReached}
           draft={messageDraft}
           onDraft={setMessageDraft}
-          onSend={(text) => {
-            const accepted =
-              conversation.active &&
-              (conversation.example ||
-                conversation.messages.length < MAX_PREVIEW_MESSAGES);
-            dispatch({ type: "send", text });
-            return accepted;
+          onSend={chat.send}
+          onRetry={chat.retry}
+          onExample={chat.example}
+          onNewConversation={() => {
+            chat.clear();
+            setMessageDraft("");
           }}
-          onExample={() => dispatch({ type: "example" })}
         />
         <p role="status" aria-live="polite" className="sr-only">
           {conversation.notice}
@@ -81,7 +77,7 @@ function AgentSpaceContent() {
         <AgentConfiguration
           prefix="desktop-agent"
           active={conversation.active}
-          onToggle={() => dispatch({ type: "toggle" })}
+          onToggle={chat.toggle}
         />
       </aside>
       <Sheet open={configOpen} onOpenChange={setConfigOpen}>
@@ -98,7 +94,7 @@ function AgentSpaceContent() {
           <AgentConfiguration
             prefix="drawer-agent"
             active={conversation.active}
-            onToggle={() => dispatch({ type: "toggle" })}
+            onToggle={chat.toggle}
           />
         </SheetContent>
       </Sheet>
@@ -107,7 +103,7 @@ function AgentSpaceContent() {
 }
 export function AgentSpace({ agent }: { agent: PreviewAgent }) {
   return (
-    <AgentConfigProvider agent={agent}>
+    <AgentConfigProvider key={agent.agentId} agent={agent}>
       <AgentSpaceContent />
     </AgentConfigProvider>
   );

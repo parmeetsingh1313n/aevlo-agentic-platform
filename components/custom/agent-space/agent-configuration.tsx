@@ -20,7 +20,7 @@ export function AgentConfiguration({
   active: boolean;
   onToggle: () => void;
 }) {
-  const { draft, edit, errors, dirty } = useAgentConfig();
+  const { draft, edit, errors, dirty, agentId } = useAgentConfig();
   const nameInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (errors.name && nameInput.current?.offsetParent !== null)
@@ -97,6 +97,7 @@ export function AgentConfiguration({
           )}
         </div>
         <ConfigurationTabs
+          agentId={agentId}
           active={active}
           onToggle={onToggle}
           prefix={prefix}

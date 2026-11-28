@@ -6,18 +6,26 @@ import { MAX_PREVIEW_MESSAGE_LENGTH } from "@/lib/agent-preview";
 import styles from "./agent-space.module.css";
 export function ChatComposer({
   active,
+  pending,
+  failed,
+  dirty,
+  capacityReached,
   draft,
   onDraft,
   onSend,
 }: {
   active: boolean;
+  pending: boolean;
+  failed: boolean;
+  dirty: boolean;
+  capacityReached: boolean;
   draft: string;
   onDraft: (value: string) => void;
   onSend: (text: string) => boolean;
 }) {
   const textarea = useRef<HTMLTextAreaElement>(null);
   function submit() {
-    if (!active || !draft.trim()) return;
+    if (!active || pending || failed || capacityReached || !draft.trim()) return;
     if (!onSend(draft)) return;
     onDraft("");
     if (textarea.current) textarea.current.style.height = "auto";
@@ -25,7 +33,7 @@ export function ChatComposer({
   return (
     <div className="shrink-0 px-4 pt-3 pb-4 sm:px-7">
       <form
-        aria-label="Conversation preview"
+        aria-label="Agent conversation"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
@@ -45,7 +53,7 @@ export function ChatComposer({
           placeholder={
             active
               ? "Message your agent…"
-              : "Resume the preview to write a message"
+              : "Resume the conversation to write a message"
           }
           aria-describedby="composer-help"
           onChange={(event) => {
@@ -68,7 +76,7 @@ export function ChatComposer({
         <div className="flex items-center justify-between gap-3 px-3 pt-1 pb-3">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <LockKeyhole size={13} aria-hidden="true" />
-            Local preview
+            {pending ? "Awaiting reply" : "Messages are not saved"}
           </span>
           <div className="flex items-center gap-3">
             {draft.length > 3200 && (
@@ -79,8 +87,8 @@ export function ChatComposer({
             <Button
               type="submit"
               size="icon-lg"
-              disabled={!active || !draft.trim()}
-              aria-label="Send preview message"
+              disabled={!active || pending || failed || capacityReached || !draft.trim()}
+              aria-label="Send message"
               className="rounded-xl motion-reduce:transition-none"
             >
               <ArrowUp className="size-5" />
@@ -93,7 +101,9 @@ export function ChatComposer({
         className="mt-2.5 flex items-center justify-between gap-3 text-[11px] leading-4 text-muted-foreground"
       >
         <span>
-          Messages stay on this page. Live AI replies are not available yet.
+          {dirty
+            ? "Save your configuration changes to use them in replies."
+            : "Replies use your saved instructions. Chat clears when you leave."}
         </span>
         <span className="hidden shrink-0 items-center gap-1.5 md:flex">
           <CornerDownLeft size={12} aria-hidden="true" />

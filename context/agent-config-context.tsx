@@ -24,6 +24,7 @@ import {
   type SavedAgentConfig,
 } from "@/lib/agent-config-state";
 import type { PreviewAgent } from "@/lib/agent-preview";
+import { prepareAgentConfigSave } from "@/lib/agent-config-save";
 
 type AgentConfigContextValue = {
   agentId: string;
@@ -91,7 +92,8 @@ export function AgentConfigProvider({
       description: state.saved.description,
       agentImage: state.saved.agentImage,
     };
-    const expectedVersion = state.saved.version;
+    let expectedSaved = state.saved;
+    let expectedVersion = expectedSaved.version;
     const controller = new AbortController();
     request.current = controller;
     inFlight.current = true;
@@ -134,7 +136,7 @@ export function AgentConfigProvider({
         return;
       }
       const unchanged =
-        latest && configSignature(latest) === configSignature(state.saved);
+        latest && configSignature(latest) === configSignature(expectedSaved);
       dispatch({
         type: "failure",
         error,
@@ -143,6 +145,33 @@ export function AgentConfigProvider({
       });
     };
     try {
+      // router.refresh() merges its result asynchronously. Read the complete
+      // owned profile before choosing a token, keeping the clicked draft locked.
+      const preparation = await prepareAgentConfigSave(agent.agentId, expectedSaved, controller.signal);
+      if (preparation.kind === "aborted") return;
+      if (preparation.kind === "unavailable") {
+        dispatch({ type: "failure", error: preparation.error, uncertain: Boolean(state.pending) });
+        return;
+      }
+      if (preparation.kind === "conflict") {
+        const desired = {
+          name: snapshot.name.trim(),
+          description: snapshot.description.trim() || null,
+          agentImage: snapshot.agentImage,
+        };
+        // An earlier uncertain PUT can already have saved the retry's draft.
+        // Confirm that read instead of issuing another write or a false conflict.
+        if (state.pending && preparation.value.version !== expectedVersion &&
+          editableConfigSignature(preparation.value) === editableConfigSignature(desired)) {
+          confirm(preparation.value, true);
+          return;
+        }
+        dispatch({ type: "failure", error: "This agent has newer saved details. Your draft is still here.", remote: preparation.value });
+        return;
+      }
+      expectedSaved = preparation.value;
+      expectedVersion = expectedSaved.version;
+      dispatch({ type: "incoming", value: expectedSaved });
       const response = await fetch("/api/agent", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

@@ -1,0 +1,236 @@
+.form {
+  width: 100%;
+  min-width: 0;
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--foreground);
+  text-align: left;
+  white-space: normal;
+}
+
+.heading h3 {
+  margin: 0 0 5px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.questions {
+  display: grid;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.question {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.question legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.options {
+  display: grid;
+  gap: 2px;
+  margin: 11px -8px 0;
+}
+
+.option {
+  display: flex;
+  min-height: 42px;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.option:hover {
+  background: var(--muted);
+}
+
+.option[data-selected="true"] {
+  background: var(--secondary);
+}
+
+.option:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.option input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 3px 0 0;
+  accent-color: var(--primary);
+}
+
+.optionCopy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.optionLabel {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.6;
+}
+
+.optionDescription {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.customHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px 12px;
+  margin: 14px 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.clear {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.clear:hover {
+  color: var(--foreground);
+}
+
+.clear:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.question textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 66px;
+  max-height: 180px;
+  resize: vertical;
+  padding: 10px 11px;
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  caret-color: var(--primary);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.question textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+.question textarea:focus-visible {
+  border-color: var(--ring);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.question:disabled .option,
+.question:disabled .clear {
+  cursor: default;
+}
+
+.question:disabled .option:hover {
+  background: transparent;
+}
+
+.question:disabled {
+  opacity: 0.65;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.submit {
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.error {
+  margin: 14px 0 0;
+  color: var(--destructive);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.completed {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  color: var(--muted-foreground);
+}
+
+.completed > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--success);
+}
+
+.completedTitle {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .form { padding: 14px; }
+  .heading h3 { font-size: 16px; }
+  .hint, .optionDescription { font-size: 12px; }
+  .question legend, .optionLabel { font-size: 14px; }
+  .question textarea { font-size: 16px; }
+  .option { min-height: 44px; }
+  .footer { flex-direction: column; align-items: stretch; gap: 12px; }
+  .submit { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option { transition: none; }
+}
