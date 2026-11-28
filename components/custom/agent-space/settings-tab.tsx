@@ -19,7 +19,7 @@ export function SettingsTab({
     <div>
       <h3 className="text-sm font-semibold">Agent settings</h3>
       <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-        Manage the conversation preview and your configuration draft.
+        Manage this conversation and your configuration draft.
       </p>
       <div className="mt-4 divide-y divide-border">
         <section className="py-4">
@@ -30,14 +30,14 @@ export function SettingsTab({
               ) : (
                 <Play className="size-4" aria-hidden="true" />
               )}
-              Conversation preview
+              Conversation
             </h4>
             <span className="text-[11px] text-muted-foreground">
               {active ? "Active" : "Paused"}
             </span>
           </div>
           <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-            Control message entry for this visit.
+            Control message entry for this visit. A reply already in progress can finish.
           </p>
           <Button
             type="button"
@@ -46,7 +46,7 @@ export function SettingsTab({
             className="mt-3 min-h-9 text-xs"
             onClick={onToggle}
           >
-            {active ? "Pause preview" : "Resume preview"}
+            {active ? "Pause conversation" : "Resume conversation"}
           </Button>
         </section>
         <section className="py-4">

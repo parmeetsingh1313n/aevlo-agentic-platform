@@ -37,6 +37,8 @@ function load(filename) {
     // Lucide's installed require export points at CJS-in-.js under type:module.
     // Use its real native ESM namespace, the same entry Next's bundler consumes.
     if (specifier === "lucide-react") return lucide;
+    // Next owns this build-time boundary marker; it has no runtime behavior here.
+    if (specifier === "server-only") return {};
     if (specifier.endsWith(".css")) {
       return { __esModule: true, default: new Proxy({}, { get: (_, key) => String(key) }) };
     }
@@ -53,6 +55,7 @@ function load(filename) {
   runInNewContext(compiled.outputText, {
     module: targetModule, exports: targetModule.exports, require: projectRequire,
     process, console, URL, URLSearchParams, Request, Response, Headers, Buffer, setTimeout, clearTimeout,
+    AbortController, AbortSignal, TextDecoder, TextEncoder, Uint8Array, structuredClone,
   }, { filename });
   return targetModule.exports;
 }

@@ -25,7 +25,7 @@ test("the public homepage gives visitors a branded entry with working auth desti
 
 test("the workspace schema preserves profiles and relates saved agents to their owners", async () => {
   const schema = await loadModule("db/schema.ts");
-  assert.deepEqual(Object.keys(schema).sort(), ["agentConfig", "users"]);
+  assert.deepEqual(Object.keys(schema).sort(), ["agentConfig", "tools", "users"]);
   assert.equal(getTableName(schema.users), "users");
   const columns = getTableColumns(schema.users);
   assert.deepEqual(Object.keys(columns), ["id", "name", "email", "createdAt", "credits"]);
@@ -38,7 +38,11 @@ test("the workspace schema preserves profiles and relates saved agents to their 
 
   assert.equal(getTableName(schema.agentConfig), "agentConfig");
   const agentColumns = getTableColumns(schema.agentConfig);
-  assert.deepEqual(Object.keys(agentColumns), ["id", "agentId", "name", "description", "agentImage", "createdAt", "userEmail"]);
+  assert.deepEqual(Object.keys(agentColumns), ["id", "agentId", "name", "description", "agentImage", "createdAt", "userEmail", "tools", "composioSessionId"]);
+  assert.equal(agentColumns.tools.notNull, true);
+  assert.equal(JSON.stringify(agentColumns.tools.default), "[]");
+  assert.equal(getTableName(schema.tools), "tools");
+  assert.equal(getTableColumns(schema.tools).slug.isUnique, true);
   assert.equal(agentColumns.id.primary, true);
   assert.equal(agentColumns.agentId.notNull, true);
   assert.equal(agentColumns.agentId.isUnique, true, "Creation requests must be unique even when writes overlap.");

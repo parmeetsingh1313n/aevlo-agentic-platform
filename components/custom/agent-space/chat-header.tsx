@@ -35,17 +35,17 @@ export function ChatHeader({
             <span aria-hidden="true" className="mx-1">
               ·
             </span>{" "}
-            Chat preview
+            Conversation
           </p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <label className="hidden cursor-pointer items-center gap-2 px-2 text-xs text-muted-foreground sm:flex">
-          <span>{active ? "Preview active" : "Preview paused"}</span>
+          <span>{active ? "Chat active" : "Chat paused"}</span>
           <Switch
             checked={active}
             onCheckedChange={onToggle}
-            aria-label="Activate conversation preview"
+            aria-label="Activate conversation"
             className="motion-reduce:transition-none"
           />
         </label>
@@ -53,8 +53,8 @@ export function ChatHeader({
           variant="ghost"
           size="icon-lg"
           onClick={onClear}
-          aria-label="New conversation preview"
-          title="New conversation preview"
+          aria-label="New conversation"
+          title="New conversation"
         >
           <Plus />
         </Button>

@@ -251,6 +251,12 @@ export function agentConfigReducer(
             }
           : state;
       }
+      // A version-only refresh can arrive during save preparation or a PUT.
+      // Preserve the clicked/newly typed draft and any real profile conflict;
+      // the request still compares the independently captured expected token.
+      if (editableConfigSignature(next) === editableConfigSignature(state.saved)) {
+        return state.remote ? state : { ...state, saved: next };
+      }
       if (
         changedConfigFields(state).length ||
         state.phase === "saving" ||

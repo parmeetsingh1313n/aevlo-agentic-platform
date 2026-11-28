@@ -165,7 +165,7 @@ export function SaveConfigDock() {
       <p className="mt-2.5 text-[11px] leading-4 text-muted-foreground">
         {dirty
           ? "Save to keep these changes across visits."
-          : "Profile changes are saved. Chat is still a preview."}
+          : "Profile changes are saved. Conversations clear when you leave."}
         <span className="ml-1.5 hidden 2xl:inline">Ctrl / ⌘ + S</span>
       </p>
     </footer>

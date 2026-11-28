@@ -23,10 +23,12 @@ export function ConfigurationTabs({
   active,
   onToggle,
   prefix,
+  agentId,
 }: {
   active: boolean;
   onToggle: () => void;
   prefix: string;
+  agentId?: string;
 }) {
   return (
     <Tabs defaultValue="general" className="gap-0">
@@ -50,7 +52,7 @@ export function ConfigurationTabs({
         <GeneralConfigTab prefix={prefix} />
       </TabsContent>
       <TabsContent value="tools" className="pt-5">
-        <ToolsTab prefix={prefix} />
+        <ToolsTab prefix={prefix} agentId={agentId} />
       </TabsContent>
       <TabsContent value="schedule" className="pt-5">
         <ScheduleTab />
